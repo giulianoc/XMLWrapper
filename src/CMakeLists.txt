@@ -40,6 +40,10 @@ if(APPLE)
 	target_link_libraries(XMLWrapper xml2)
 endif()
 
-install (TARGETS XMLWrapper DESTINATION lib)
-install (FILES ${HEADERS} DESTINATION include)
+if (ZORAC)
+	install(TARGETS XMLWrapper DESTINATION services/cms-import)
+else()
+	install (TARGETS XMLWrapper DESTINATION lib)
+	install (FILES ${HEADERS} DESTINATION include)
+endif()
 
