@@ -35,6 +35,9 @@ class XMLWrapper
 		int maxRetryNumber, int secondsToWaitBeforeToRetry, vector<pair<string, string>> nameServices
 	);
 
+	string toString();
+	string nodeToString(xmlNodePtr node);
+
 	xmlNodePtr asRootNode();
 
 	xmlXPathObjectPtr xPath(string xPathExpression, xmlNodePtr startingNode = nullptr, bool noErrorLog = false);

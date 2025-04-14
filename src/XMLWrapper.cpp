@@ -1,6 +1,7 @@
 
 #include "XMLWrapper.h"
 #include "CurlWrapper.h"
+#include <exception>
 #include <regex>
 
 XMLWrapper::XMLWrapper()
@@ -154,8 +155,9 @@ xmlXPathObjectPtr XMLWrapper::xPath(string xPathExpression, xmlNodePtr startingN
 			{
 				string errorMessage = std::format(
 					"xmlXPathEvalExpression failed"
-					", xPathExpression: {}",
-					xPathExpression
+					", xPathExpression: {}"
+					", nodeDump: {}",
+					xPathExpression, nodeToString(startingNode)
 				);
 				if (!noErrorLog)
 					SPDLOG_ERROR(errorMessage);
@@ -633,7 +635,7 @@ void XMLWrapper::logAttributes(xmlNodePtr node)
 			attribute = attribute->next;
 		}
 	}
-	catch (runtime_error &e)
+	catch (exception &e)
 	{
 		SPDLOG_ERROR(
 			"logAttributes failed"
@@ -642,16 +644,68 @@ void XMLWrapper::logAttributes(xmlNodePtr node)
 			(node == nullptr ? "" : (char *)node->name), e.what()
 		);
 
-		throw e;
+		throw;
+	}
+}
+
+string XMLWrapper::toString()
+{
+	if (_doc == nullptr)
+	{
+		string errorMessage = std::format("Document not initialized");
+		SPDLOG_ERROR(errorMessage);
+
+		throw runtime_error(errorMessage);
+	}
+
+	string out;
+
+	xmlChar *s;
+	int size;
+	// xmlDocDumpFormatMemoryEnc(pDoc, &psOutput, &iSize, "UTF-8", 1);
+	xmlDocDumpMemory(_doc, &s, &size);
+	if (s == NULL)
+	{
+		SPDLOG_ERROR("xmlDocDumpMemory failed");
+		throw bad_alloc();
+	}
+
+	try
+	{
+		out = (char *)s;
 	}
 	catch (exception &e)
 	{
 		SPDLOG_ERROR(
-			"logAttributes failed"
-			", node->name: {}",
-			(node == nullptr ? "" : (char *)node->name)
+			"xmlDocDumpMemory failed"
+			", e.what(): {}",
+			e.what()
 		);
+		xmlFree(s);
 
-		throw e;
+		throw;
 	}
+
+	xmlFree(s);
+
+	return out;
+}
+
+string XMLWrapper::nodeToString(xmlNodePtr node)
+{
+	xmlBufferPtr buffer = xmlBufferCreate();
+	if (!buffer)
+		return "";
+
+	// Dump del nodo nel buffer
+	xmlNodeDump(buffer, node->doc, node, 0, 1); // indentazione = 1
+
+	string out;
+	if (buffer->content)
+	{
+		out = reinterpret_cast<const char *>(buffer->content);
+	}
+
+	xmlBufferFree(buffer);
+	return out;
 }
