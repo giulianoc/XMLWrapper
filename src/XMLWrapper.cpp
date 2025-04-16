@@ -155,9 +155,8 @@ xmlXPathObjectPtr XMLWrapper::xPath(string xPathExpression, xmlNodePtr startingN
 			{
 				string errorMessage = std::format(
 					"xmlXPathEvalExpression failed"
-					", xPathExpression: {}"
-					", nodeDump: {}",
-					xPathExpression, nodeToString(startingNode)
+					", xPathExpression: {}", // ", nodeDump: {}",
+					xPathExpression			 //, nodeToString(startingNode)
 				);
 				if (!noErrorLog)
 					SPDLOG_ERROR(errorMessage);
