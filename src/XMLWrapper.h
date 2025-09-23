@@ -3,6 +3,7 @@
 #define XMLWrapper_h
 
 #include <stdexcept>
+#include <string_view>
 #ifndef SPDLOG_ACTIVE_LEVEL
 #define SPDLOG_ACTIVE_LEVEL SPDLOG_LEVEL_TRACE
 #endif
@@ -19,8 +20,10 @@ using namespace std;
 
 struct XMLReadMemory : public runtime_error
 {
-	XMLReadMemory(string message) : runtime_error(message) {};
-	virtual string type() { return "XMLReadMemory"; }
+	XMLReadMemory(const string &message) : runtime_error(message) {};
+	virtual ~XMLReadMemory() noexcept = default;
+
+	virtual string_view type() const noexcept { return "XMLReadMemory"; }
 };
 
 class XMLWrapper
