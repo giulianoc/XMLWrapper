@@ -2,6 +2,7 @@
 #include "XMLWrapper.h"
 #include "CurlWrapper.h"
 #include <exception>
+#include <libxml/xpathInternals.h>
 #include <regex>
 
 XMLWrapper::XMLWrapper()
@@ -27,8 +28,9 @@ void XMLWrapper::finish()
 }
 
 void XMLWrapper::loadXML(
-	string url, long timeoutInSeconds, string basicAuthenticationUser, string basicAuthenticationPassword, vector<string> otherHeaders,
-	int maxRetryNumber, int secondsToWaitBeforeToRetry, vector<pair<string, string>> nameServices
+	const string& url, long timeoutInSeconds, const string& basicAuthenticationUser, const string& basicAuthenticationPassword,
+	const vector<string>& otherHeaders,
+	int maxRetryNumber, int secondsToWaitBeforeToRetry, const vector<pair<string, string>>& nameServices
 )
 {
 	try
@@ -80,7 +82,7 @@ void XMLWrapper::loadXML(
 			throw runtime_error(errorMessage);
 		}
 
-		for (pair<string, string> nameService : nameServices)
+		for (const pair<string, string>& nameService : nameServices)
 			xmlXPathRegisterNs(_xpathCtx, BAD_CAST nameService.first.c_str(), BAD_CAST nameService.second.c_str());
 	}
 	catch (exception &e)
@@ -98,7 +100,7 @@ void XMLWrapper::loadXML(
 	}
 }
 
-xmlNodePtr XMLWrapper::asRootNode()
+xmlNodePtr XMLWrapper::asRootNode() const
 {
 	try
 	{
@@ -130,7 +132,7 @@ xmlNodePtr XMLWrapper::asRootNode()
 	}
 }
 
-xmlXPathObjectPtr XMLWrapper::xPath(string xPathExpression, xmlNodePtr startingNode, bool noErrorLog)
+xmlXPathObjectPtr XMLWrapper::xPath(const string& xPathExpression, xmlNodePtr startingNode, bool noErrorLog) const
 {
 	xmlXPathObjectPtr resultToBeFreed = nullptr;
 	try
@@ -260,7 +262,7 @@ xmlXPathObjectPtr XMLWrapper::xPath(string xPathExpression, xmlNodePtr startingN
 	}
 }
 
-string XMLWrapper::asAttribute(xmlNodePtr node, string attributeName, bool emptyOnError)
+string XMLWrapper::asAttribute(xmlNodePtr node, const string& attributeName, bool emptyOnError)
 {
 	xmlChar *attributeValue = nullptr;
 	try
@@ -272,7 +274,7 @@ string XMLWrapper::asAttribute(xmlNodePtr node, string attributeName, bool empty
 
 			throw runtime_error(errorMessage);
 		}
-		string sAttributeValue = (char *)attributeValue;
+		string sAttributeValue = reinterpret_cast<char *>(attributeValue);
 		xmlFree(attributeValue);
 		attributeValue = nullptr;
 
@@ -304,7 +306,7 @@ string XMLWrapper::asAttribute(xmlNodePtr node, string attributeName, bool empty
 			"asAttribute failed"
 			", node->name: {}"
 			", attributeName: {}",
-			(node == nullptr ? "" : (char *)node->name), attributeName
+			node == nullptr ? "" : (char *)node->name, attributeName
 		);
 
 		if (attributeValue != nullptr)
@@ -314,7 +316,7 @@ string XMLWrapper::asAttribute(xmlNodePtr node, string attributeName, bool empty
 	}
 }
 
-string XMLWrapper::asAttribute(string xPathExpression, string attributeName, xmlNodePtr startingNode, bool emptyOnError)
+string XMLWrapper::asAttribute(string xPathExpression, const string& attributeName, xmlNodePtr startingNode, bool emptyOnError) const
 {
 	xmlXPathObjectPtr resultToBeFreed = nullptr;
 	try
@@ -392,7 +394,7 @@ string XMLWrapper::asAttribute(string xPathExpression, string attributeName, xml
 	}
 }
 
-vector<string> XMLWrapper::asAttributesList(string xPathExpression, string attributeName, xmlNodePtr startingNode, bool emptyOnError)
+vector<string> XMLWrapper::asAttributesList(const string& xPathExpression, const string& attributeName, xmlNodePtr startingNode, bool emptyOnError) const
 {
 	xmlXPathObjectPtr resultToBeFreed = nullptr;
 	try
@@ -445,7 +447,7 @@ vector<string> XMLWrapper::asAttributesList(string xPathExpression, string attri
 	}
 }
 
-vector<string> XMLWrapper::asTextList(string xPathExpression, xmlNodePtr startingNode, bool emptyOnError)
+vector<string> XMLWrapper::asTextList(const string& xPathExpression, xmlNodePtr startingNode, bool emptyOnError) const
 {
 	xmlXPathObjectPtr resultToBeFreed = nullptr;
 	try
@@ -473,7 +475,7 @@ vector<string> XMLWrapper::asTextList(string xPathExpression, xmlNodePtr startin
 			xmlXPathFreeObject(resultToBeFreed);
 
 		if (emptyOnError)
-			return vector<string>();
+			return {};
 		else
 		{
 			SPDLOG_ERROR(
@@ -501,7 +503,7 @@ vector<string> XMLWrapper::asTextList(string xPathExpression, xmlNodePtr startin
 	}
 }
 
-string XMLWrapper::asText(string xPathExpression, xmlNodePtr startingNode, bool emptyOnError)
+string XMLWrapper::asText(const string& xPathExpression, xmlNodePtr startingNode, bool emptyOnError) const
 {
 	xmlXPathObjectPtr resultToBeFreed = nullptr;
 	try
@@ -509,13 +511,13 @@ string XMLWrapper::asText(string xPathExpression, xmlNodePtr startingNode, bool 
 		resultToBeFreed = xPath(xPathExpression, startingNode, emptyOnError);
 		string text;
 		if (resultToBeFreed->type == XPATH_STRING)
-			text = (char *)resultToBeFreed->stringval;
+			text = reinterpret_cast<char *>(resultToBeFreed->stringval);
 		else if (resultToBeFreed->type == XPATH_NODESET && resultToBeFreed->nodesetval->nodeNr > 0)
 		{
 			if (resultToBeFreed->nodesetval->nodeTab[0]->type == XML_TEXT_NODE)
-				text = (char *)resultToBeFreed->nodesetval->nodeTab[0]->content;
+				text = reinterpret_cast<char *>(resultToBeFreed->nodesetval->nodeTab[0]->content);
 			else if (resultToBeFreed->nodesetval->nodeTab[0]->type == XML_ATTRIBUTE_NODE)
-				text = (char *)resultToBeFreed->nodesetval->nodeTab[0]->children->content;
+				text = reinterpret_cast<char *>(resultToBeFreed->nodesetval->nodeTab[0]->children->content);
 		}
 		else
 		{
@@ -523,7 +525,7 @@ string XMLWrapper::asText(string xPathExpression, xmlNodePtr startingNode, bool 
 				"xPathExpression was found but how to retrieve the text?"
 				", xPathExpression: {}"
 				", type: {}",
-				xPathExpression, (int)(resultToBeFreed->type)
+				xPathExpression, static_cast<int>(resultToBeFreed->type)
 			);
 			SPDLOG_ERROR(errorMessage);
 
@@ -571,7 +573,7 @@ string XMLWrapper::asText(string xPathExpression, xmlNodePtr startingNode, bool 
 	}
 }
 
-bool XMLWrapper::tagExist(string xPathExpression, xmlNodePtr startingNode, bool emptyOnError)
+bool XMLWrapper::tagExist(const string& xPathExpression, xmlNodePtr startingNode, bool emptyOnError) const
 {
 	xmlXPathObjectPtr resultToBeFreed = nullptr;
 	try
@@ -647,7 +649,7 @@ void XMLWrapper::logAttributes(xmlNodePtr node)
 	}
 }
 
-string XMLWrapper::toString()
+string XMLWrapper::toString() const
 {
 	if (_doc == nullptr)
 	{
@@ -671,7 +673,7 @@ string XMLWrapper::toString()
 
 	try
 	{
-		out = (char *)s;
+		out = reinterpret_cast<char *>(s);
 	}
 	catch (exception &e)
 	{

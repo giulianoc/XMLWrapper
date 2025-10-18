@@ -1,6 +1,5 @@
 
-#ifndef XMLWrapper_h
-#define XMLWrapper_h
+#pragma once
 
 #include <stdexcept>
 #include <string_view>
@@ -9,21 +8,18 @@
 #endif
 #include "spdlog/spdlog.h"
 
-#include <fstream>
-#include <libxml/parser.h>
 #include <libxml/tree.h>
 #include <libxml/xpath.h>
-#include <libxml/xpathInternals.h>
 #include <vector>
 
 using namespace std;
 
-struct XMLReadMemory : public runtime_error
+struct XMLReadMemory final : public runtime_error
 {
-	XMLReadMemory(const string &message) : runtime_error(message) {};
-	virtual ~XMLReadMemory() noexcept = default;
+	explicit XMLReadMemory(const string &message) : runtime_error(message) {};
+	~XMLReadMemory() noexcept override = default;
 
-	virtual string_view type() const noexcept { return "XMLReadMemory"; }
+	[[nodiscard]] virtual string_view type() const noexcept { return "XMLReadMemory"; }
 };
 
 class XMLWrapper
@@ -34,30 +30,30 @@ class XMLWrapper
 	~XMLWrapper();
 
 	void loadXML(
-		string url, long timeoutInSeconds, string basicAuthenticationUser, string basicAuthenticationPassword, vector<string> otherHeaders,
-		int maxRetryNumber, int secondsToWaitBeforeToRetry, vector<pair<string, string>> nameServices
+		const string &url, long timeoutInSeconds, const string &basicAuthenticationUser, const string &basicAuthenticationPassword,
+		const vector<string> &otherHeaders, int maxRetryNumber, int secondsToWaitBeforeToRetry, const vector<pair<string, string>> &nameServices
 	);
 
-	string toString();
-	string nodeToString(xmlNodePtr node);
+	[[nodiscard]] string toString() const;
+	static string nodeToString(xmlNodePtr node);
 
-	xmlNodePtr asRootNode();
+	[[nodiscard]] xmlNodePtr asRootNode() const;
 
-	xmlXPathObjectPtr xPath(string xPathExpression, xmlNodePtr startingNode = nullptr, bool noErrorLog = false);
+	xmlXPathObjectPtr xPath(const string &xPathExpression, xmlNodePtr startingNode = nullptr, bool noErrorLog = false) const;
 
-	string asAttribute(xmlNodePtr node, string attributeName, bool emptyOnError = false);
+	static string asAttribute(xmlNodePtr node, const string &attributeName, bool emptyOnError = false);
 
-	string asAttribute(string xPathExpression, string attributeName, xmlNodePtr startingNode = nullptr, bool emptyOnError = false);
+	string asAttribute(string xPathExpression, const string& attributeName, xmlNodePtr startingNode = nullptr, bool emptyOnError = false) const;
 
-	vector<string> asAttributesList(string xPathExpression, string attributeName, xmlNodePtr startingNode = nullptr, bool emptyOnError = false);
+	vector<string> asAttributesList(const string &xPathExpression, const string &attributeName, xmlNodePtr startingNode = nullptr, bool emptyOnError = false) const;
 
-	string asText(string xPathExpression, xmlNodePtr startingNode, bool emptyOnError = false);
+	string asText(const string &xPathExpression, xmlNodePtr startingNode, bool emptyOnError = false) const;
 
-	bool tagExist(string xPathExpression, xmlNodePtr startingNode, bool emptyOnError = false);
+	bool tagExist(const string &xPathExpression, xmlNodePtr startingNode, bool emptyOnError = false) const;
 
-	vector<string> asTextList(string xPathExpression, xmlNodePtr startingNode, bool emptyOnError = false);
+	vector<string> asTextList(const string &xPathExpression, xmlNodePtr startingNode, bool emptyOnError = false) const;
 
-	void logAttributes(xmlNodePtr node);
+	static void logAttributes(xmlNodePtr node);
 
 	string _sourceXML;
 
@@ -67,5 +63,3 @@ class XMLWrapper
 
 	void finish();
 };
-
-#endif
