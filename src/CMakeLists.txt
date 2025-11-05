@@ -30,6 +30,7 @@ SET (HEADERS
 
 include_directories("${SPDLOG_INCLUDE_DIR}")
 include_directories("${NLOHMANN_INCLUDE_DIR}")
+include_directories("${JSONUTILS_INCLUDE_DIR}")
 include_directories("${CURLWRAPPER_INCLUDE_DIR}")
 include_directories("${XML2_INCLUDE_DIR}")
 
