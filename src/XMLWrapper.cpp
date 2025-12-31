@@ -5,6 +5,8 @@
 #include <libxml/xpathInternals.h>
 #include <regex>
 
+using namespace std;
+
 XMLWrapper::XMLWrapper()
 {
 	_doc = nullptr;
