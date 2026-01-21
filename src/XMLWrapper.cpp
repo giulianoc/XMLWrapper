@@ -65,7 +65,7 @@ void XMLWrapper::loadXML(
 				", url: {}",
 				url
 			);
-			SPDLOG_ERROR(errorMessage);
+			LOG_ERROR(errorMessage);
 
 			throw XMLReadMemory(errorMessage);
 		}
@@ -79,7 +79,7 @@ void XMLWrapper::loadXML(
 				", url: {}",
 				url
 			);
-			SPDLOG_ERROR(errorMessage);
+			LOG_ERROR(errorMessage);
 
 			throw runtime_error(errorMessage);
 		}
@@ -89,7 +89,7 @@ void XMLWrapper::loadXML(
 	}
 	catch (exception &e)
 	{
-		SPDLOG_ERROR(
+		LOG_ERROR(
 			"loadData failed"
 			", url: {}"
 			", e.what(): {}",
@@ -109,7 +109,7 @@ xmlNodePtr XMLWrapper::asRootNode() const
 		if (_doc == nullptr)
 		{
 			string errorMessage = std::format("Document not initialized");
-			SPDLOG_ERROR(errorMessage);
+			LOG_ERROR(errorMessage);
 
 			throw runtime_error(errorMessage);
 		}
@@ -118,7 +118,7 @@ xmlNodePtr XMLWrapper::asRootNode() const
 	}
 	catch (runtime_error &e)
 	{
-		SPDLOG_ERROR(
+		LOG_ERROR(
 			"asRootNode failed"
 			", e.what(): {}",
 			e.what()
@@ -128,7 +128,7 @@ xmlNodePtr XMLWrapper::asRootNode() const
 	}
 	catch (exception &e)
 	{
-		SPDLOG_ERROR("asRootNode failed");
+		LOG_ERROR("asRootNode failed");
 
 		throw e;
 	}
@@ -142,7 +142,7 @@ xmlXPathObjectPtr XMLWrapper::xPath(const string& xPathExpression, xmlNodePtr st
 		if (_doc == nullptr)
 		{
 			string errorMessage = std::format("Document not initialized");
-			SPDLOG_ERROR(errorMessage);
+			LOG_ERROR(errorMessage);
 
 			throw runtime_error(errorMessage);
 		}
@@ -163,7 +163,7 @@ xmlXPathObjectPtr XMLWrapper::xPath(const string& xPathExpression, xmlNodePtr st
 					xPathExpression			 //, nodeToString(startingNode)
 				);
 				if (!noErrorLog)
-					SPDLOG_ERROR(errorMessage);
+					LOG_ERROR(errorMessage);
 
 				throw runtime_error(errorMessage);
 			}
@@ -205,7 +205,7 @@ xmlXPathObjectPtr XMLWrapper::xPath(const string& xPathExpression, xmlNodePtr st
 			};
 			*/
 			/*
-			SPDLOG_INFO("xmlXPathEvalExpression"
+			LOG_INFO("xmlXPathEvalExpression"
 				", xPathExpression: {}"
 				", type: {}"
 				", name[0]: {}"
@@ -237,7 +237,7 @@ xmlXPathObjectPtr XMLWrapper::xPath(const string& xPathExpression, xmlNodePtr st
 	catch (runtime_error &e)
 	{
 		if (!noErrorLog)
-			SPDLOG_ERROR(
+			LOG_ERROR(
 				"xPath failed"
 				", xPathExpression: {}"
 				", e.what(): {}",
@@ -251,7 +251,7 @@ xmlXPathObjectPtr XMLWrapper::xPath(const string& xPathExpression, xmlNodePtr st
 	}
 	catch (exception &e)
 	{
-		SPDLOG_ERROR(
+		LOG_ERROR(
 			"xPath failed"
 			", xPathExpression: {}",
 			xPathExpression
@@ -291,7 +291,7 @@ string XMLWrapper::asAttribute(xmlNodePtr node, const string& attributeName, boo
 			return "";
 		else
 		{
-			SPDLOG_ERROR(
+			LOG_ERROR(
 				"asAttribute failed"
 				", node->name: {}"
 				", attributeName: {}"
@@ -304,7 +304,7 @@ string XMLWrapper::asAttribute(xmlNodePtr node, const string& attributeName, boo
 	}
 	catch (exception &e)
 	{
-		SPDLOG_ERROR(
+		LOG_ERROR(
 			"asAttribute failed"
 			", node->name: {}"
 			", attributeName: {}",
@@ -328,7 +328,7 @@ string XMLWrapper::asAttribute(string xPathExpression, const string& attributeNa
 	catch (runtime_error &e)
 	{
 		if (!emptyOnError)
-			SPDLOG_ERROR(
+			LOG_ERROR(
 				"asAttribute failed"
 				", xPathExpression: {}"
 				", e.what(): {}",
@@ -345,7 +345,7 @@ string XMLWrapper::asAttribute(string xPathExpression, const string& attributeNa
 	}
 	catch (exception &e)
 	{
-		SPDLOG_ERROR(
+		LOG_ERROR(
 			"asAttribute failed"
 			", xPathExpression: {}",
 			xPathExpression
@@ -369,7 +369,7 @@ string XMLWrapper::asAttribute(string xPathExpression, const string& attributeNa
 	catch (runtime_error &e)
 	{
 		if (!emptyOnError)
-			SPDLOG_ERROR(
+			LOG_ERROR(
 				"asAttribute failed"
 				", xPathExpression: {}"
 				", e.what(): {}",
@@ -383,7 +383,7 @@ string XMLWrapper::asAttribute(string xPathExpression, const string& attributeNa
 	}
 	catch (exception &e)
 	{
-		SPDLOG_ERROR(
+		LOG_ERROR(
 			"asAttribute failed"
 			", xPathExpression: {}",
 			xPathExpression
@@ -424,7 +424,7 @@ vector<string> XMLWrapper::asAttributesList(const string& xPathExpression, const
 			return vector<string>();
 		else
 		{
-			SPDLOG_ERROR(
+			LOG_ERROR(
 				"asAttributesList failed"
 				", xPathExpression: {}"
 				", e.what(): {}",
@@ -436,7 +436,7 @@ vector<string> XMLWrapper::asAttributesList(const string& xPathExpression, const
 	}
 	catch (exception &e)
 	{
-		SPDLOG_ERROR(
+		LOG_ERROR(
 			"asAttributesList failed"
 			", xPathExpression: {}",
 			xPathExpression
@@ -480,7 +480,7 @@ vector<string> XMLWrapper::asTextList(const string& xPathExpression, xmlNodePtr 
 			return {};
 		else
 		{
-			SPDLOG_ERROR(
+			LOG_ERROR(
 				"asAttributes failed"
 				", xPathExpression: {}"
 				", e.what(): {}",
@@ -492,7 +492,7 @@ vector<string> XMLWrapper::asTextList(const string& xPathExpression, xmlNodePtr 
 	}
 	catch (exception &e)
 	{
-		SPDLOG_ERROR(
+		LOG_ERROR(
 			"asAttributes failed"
 			", xPathExpression: {}",
 			xPathExpression
@@ -529,7 +529,7 @@ string XMLWrapper::asText(const string& xPathExpression, xmlNodePtr startingNode
 				", type: {}",
 				xPathExpression, static_cast<int>(resultToBeFreed->type)
 			);
-			SPDLOG_ERROR(errorMessage);
+			LOG_ERROR(errorMessage);
 
 			// resultToBeFreed will be freed into the catch
 
@@ -550,7 +550,7 @@ string XMLWrapper::asText(const string& xPathExpression, xmlNodePtr startingNode
 			return "";
 		else
 		{
-			SPDLOG_ERROR(
+			LOG_ERROR(
 				"asText failed"
 				", xPathExpression: {}"
 				", e.what(): {}",
@@ -562,7 +562,7 @@ string XMLWrapper::asText(const string& xPathExpression, xmlNodePtr startingNode
 	}
 	catch (exception &e)
 	{
-		SPDLOG_ERROR(
+		LOG_ERROR(
 			"asText failed"
 			", xPathExpression: {}",
 			xPathExpression
@@ -600,7 +600,7 @@ bool XMLWrapper::tagExist(const string& xPathExpression, xmlNodePtr startingNode
 			return false;
 		else
 		{
-			SPDLOG_ERROR(
+			LOG_ERROR(
 				"tagExist failed"
 				", xPathExpression: {}"
 				", e.what(): {}",
@@ -612,7 +612,7 @@ bool XMLWrapper::tagExist(const string& xPathExpression, xmlNodePtr startingNode
 	}
 	catch (exception &e)
 	{
-		SPDLOG_ERROR(
+		LOG_ERROR(
 			"tagExist failed"
 			", xPathExpression: {}",
 			xPathExpression
@@ -633,14 +633,14 @@ void XMLWrapper::logAttributes(xmlNodePtr node)
 		while (attribute)
 		{
 			xmlChar *value = xmlNodeListGetString(node->doc, attribute->children, 1);
-			SPDLOG_INFO("{}: {}", (char *)attribute->name, (char *)value);
+			LOG_INFO("{}: {}", (char *)attribute->name, (char *)value);
 			xmlFree(value);
 			attribute = attribute->next;
 		}
 	}
 	catch (exception &e)
 	{
-		SPDLOG_ERROR(
+		LOG_ERROR(
 			"logAttributes failed"
 			", node->name: {}"
 			", e.what(): {}",
@@ -656,7 +656,7 @@ string XMLWrapper::toString() const
 	if (_doc == nullptr)
 	{
 		string errorMessage = std::format("Document not initialized");
-		SPDLOG_ERROR(errorMessage);
+		LOG_ERROR(errorMessage);
 
 		throw runtime_error(errorMessage);
 	}
@@ -669,7 +669,7 @@ string XMLWrapper::toString() const
 	xmlDocDumpMemory(_doc, &s, &size);
 	if (s == NULL)
 	{
-		SPDLOG_ERROR("xmlDocDumpMemory failed");
+		LOG_ERROR("xmlDocDumpMemory failed");
 		throw bad_alloc();
 	}
 
@@ -679,7 +679,7 @@ string XMLWrapper::toString() const
 	}
 	catch (exception &e)
 	{
-		SPDLOG_ERROR(
+		LOG_ERROR(
 			"xmlDocDumpMemory failed"
 			", e.what(): {}",
 			e.what()
