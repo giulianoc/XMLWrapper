@@ -44,7 +44,7 @@ endif()
 
 if(ZORAC)
 	install (TARGETS XMLWrapper DESTINATION services/cms-import)
-	#install (TARGETS XMLWrapper DESTINATION services/cms-pusher)
+	install (TARGETS XMLWrapper DESTINATION utilities)
 	#install (TARGETS XMLWrapper DESTINATION services/cms-getter)
 else()
 	install (TARGETS XMLWrapper DESTINATION lib)
