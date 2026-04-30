@@ -31,8 +31,10 @@ class XMLWrapper
 		const std::vector<std::string> &otherHeaders, int maxRetryNumber, int secondsToWaitBeforeToRetry,
 		const std::vector<std::pair<std::string, std::string>> &nameServices
 	);
+	[[nodiscard]] std::string asString(bool pretty) const;
+	void saveXML(std::string pathName, bool pretty) const;
 
-	[[nodiscard]] std::string toString() const;
+	// [[nodiscard]] std::string toString() const;
 	static std::string nodeToString(xmlNodePtr node);
 
 	[[nodiscard]] xmlNodePtr asRootNode() const;
@@ -42,6 +44,10 @@ class XMLWrapper
 	static std::string asAttribute(xmlNodePtr node, const std::string &attributeName, bool emptyOnError = false);
 
 	std::string asAttribute(std::string xPathExpression, const std::string& attributeName, xmlNodePtr startingNode = nullptr, bool emptyOnError = false) const;
+	bool setAttribute(
+		const std::string &xPathExpression, size_t nodeIndex, const std::string &attributeName, const std::string &attributeValue,
+		xmlNodePtr startingNode
+	) const;
 
 	std::vector<std::string> asAttributesList(const std::string &xPathExpression, const std::string &attributeName, xmlNodePtr startingNode = nullptr, bool emptyOnError = false) const;
 

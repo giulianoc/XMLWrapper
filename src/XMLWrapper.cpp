@@ -87,16 +87,109 @@ void XMLWrapper::loadXML(
 		for (const pair<string, string>& nameService : nameServices)
 			xmlXPathRegisterNs(_xpathCtx, BAD_CAST nameService.first.c_str(), BAD_CAST nameService.second.c_str());
 	}
-	catch (exception &e)
+	catch (const exception &e)
 	{
 		LOG_ERROR(
-			"loadData failed"
+			"loadXML failed"
 			", url: {}"
-			", e.what(): {}",
+			", exception: {}",
 			url, e.what()
 		);
 
 		finish();
+
+		throw;
+	}
+}
+
+string XMLWrapper::asString(const bool pretty) const
+{
+	xmlChar* mem = nullptr;
+	try
+	{
+		if (!_doc)
+		{
+			const string errorMessage = "Document not initialized";
+			LOG_ERROR(errorMessage);
+
+			throw runtime_error(errorMessage);
+		}
+
+		// Assicura versione/encoding (così libxml2 emette la declaration)
+		if (!_doc->version)
+			_doc->version = xmlStrdup(BAD_CAST "1.0");
+
+		// Imposta l'encoding: xmlCharEncodingHandler viene scelto dal nome ("UTF-8")
+		// Nota: doc->encoding è xmlChar*, va allocata con funzioni libxml2.
+		if (!_doc->encoding)
+			_doc->encoding = xmlStrdup(BAD_CAST "UTF-8");
+
+		int size = 0;
+		if (pretty)
+			xmlDocDumpFormatMemoryEnc(_doc, &mem, &size, "UTF-8", 1);
+		else
+			xmlDocDumpMemoryEnc(_doc, &mem, &size, "UTF-8");
+		if (!mem || size <= 0)
+		{
+			const string errorMessage = std::format(
+				"xmlDocDumpMemoryEnc failed"
+				", size: {}", size
+				);
+			LOG_ERROR(errorMessage);
+
+			if (mem)
+				xmlFree(mem);
+
+			throw runtime_error(errorMessage);
+		}
+
+		std::string sXML(reinterpret_cast<char*>(mem), static_cast<size_t>(size));
+		xmlFree(mem);
+
+		return sXML;
+	}
+	catch (const exception &e)
+	{
+		LOG_ERROR(
+			"asString failed"
+			", exception: {}",
+			e.what()
+		);
+
+		if (mem)
+			xmlFree(mem);
+
+		throw;
+	}
+}
+
+void XMLWrapper::saveXML(string pathName, bool pretty) const
+{
+	try
+	{
+		string sXML = asString(pretty);
+
+		std::ofstream out(pathName, std::ios::binary); // binary evita conversioni newline
+		if (!out)
+		{
+			const string errorMessage = std::format("Creation of file failed"
+				", pathName: {}", pathName
+				);
+			LOG_ERROR(errorMessage);
+
+			throw runtime_error(errorMessage);
+		}
+
+		out.write(sXML.data(), static_cast<std::streamsize>(sXML.size()));
+	}
+	catch (const exception &e)
+	{
+		LOG_ERROR(
+			"saveXML failed"
+			", pathName: {}"
+			", exception: {}",
+			pathName, e.what()
+		);
 
 		throw;
 	}
@@ -116,21 +209,15 @@ xmlNodePtr XMLWrapper::asRootNode() const
 
 		return xmlDocGetRootElement(_doc);
 	}
-	catch (runtime_error &e)
+	catch (const exception &e)
 	{
 		LOG_ERROR(
 			"asRootNode failed"
-			", e.what(): {}",
+			", exception: {}",
 			e.what()
 		);
 
-		throw e;
-	}
-	catch (exception &e)
-	{
-		LOG_ERROR("asRootNode failed");
-
-		throw e;
+		throw;
 	}
 }
 
@@ -234,33 +321,20 @@ xmlXPathObjectPtr XMLWrapper::xPath(const string& xPathExpression, xmlNodePtr st
 
 		return resultToBeFreed;
 	}
-	catch (runtime_error &e)
+	catch (const exception &e)
 	{
 		if (!noErrorLog)
 			LOG_ERROR(
 				"xPath failed"
 				", xPathExpression: {}"
-				", e.what(): {}",
+				", exception: {}",
 				xPathExpression, e.what()
 			);
 
 		if (resultToBeFreed != nullptr)
 			xmlXPathFreeObject(resultToBeFreed);
 
-		throw e;
-	}
-	catch (exception &e)
-	{
-		LOG_ERROR(
-			"xPath failed"
-			", xPathExpression: {}",
-			xPathExpression
-		);
-
-		if (resultToBeFreed != nullptr)
-			xmlXPathFreeObject(resultToBeFreed);
-
-		throw e;
+		throw;
 	}
 }
 
@@ -282,28 +356,14 @@ string XMLWrapper::asAttribute(xmlNodePtr node, const string& attributeName, boo
 
 		return sAttributeValue;
 	}
-	catch (runtime_error &e)
+	catch (const exception &e)
 	{
 		if (attributeValue != nullptr)
 			xmlFree(attributeValue);
 
 		if (emptyOnError)
 			return "";
-		else
-		{
-			LOG_ERROR(
-				"asAttribute failed"
-				", node->name: {}"
-				", attributeName: {}"
-				", e.what(): {}",
-				(node == nullptr ? "" : (char *)node->name), attributeName.c_str(), e.what()
-			);
 
-			throw e;
-		}
-	}
-	catch (exception &e)
-	{
 		LOG_ERROR(
 			"asAttribute failed"
 			", node->name: {}"
@@ -311,10 +371,7 @@ string XMLWrapper::asAttribute(xmlNodePtr node, const string& attributeName, boo
 			node == nullptr ? "" : (char *)node->name, attributeName
 		);
 
-		if (attributeValue != nullptr)
-			xmlFree(attributeValue);
-
-		throw e;
+		throw;
 	}
 }
 
@@ -325,36 +382,19 @@ string XMLWrapper::asAttribute(string xPathExpression, const string& attributeNa
 	{
 		resultToBeFreed = xPath(xPathExpression, startingNode, emptyOnError);
 	}
-	catch (runtime_error &e)
+	catch (const exception &e)
 	{
 		if (!emptyOnError)
 			LOG_ERROR(
 				"asAttribute failed"
 				", xPathExpression: {}"
-				", e.what(): {}",
+				", exception: {}",
 				xPathExpression, e.what()
 			);
 
-		if (resultToBeFreed != nullptr)
-			xmlXPathFreeObject(resultToBeFreed);
-
 		if (emptyOnError)
 			return "";
-		else
-			throw e;
-	}
-	catch (exception &e)
-	{
-		LOG_ERROR(
-			"asAttribute failed"
-			", xPathExpression: {}",
-			xPathExpression
-		);
-
-		if (resultToBeFreed != nullptr)
-			xmlXPathFreeObject(resultToBeFreed);
-
-		throw e;
+		throw;
 	}
 
 	try
@@ -366,34 +406,105 @@ string XMLWrapper::asAttribute(string xPathExpression, const string& attributeNa
 
 		return attributeValue;
 	}
-	catch (runtime_error &e)
+	catch (const exception &e)
 	{
 		if (!emptyOnError)
 			LOG_ERROR(
 				"asAttribute failed"
 				", xPathExpression: {}"
-				", e.what(): {}",
+				", exception: {}",
 				xPathExpression, e.what()
 			);
 
-		if (resultToBeFreed != nullptr)
-			xmlXPathFreeObject(resultToBeFreed);
+		xmlXPathFreeObject(resultToBeFreed);
 
-		throw e;
+		throw;
 	}
-	catch (exception &e)
-	{
-		LOG_ERROR(
-			"asAttribute failed"
-			", xPathExpression: {}",
-			xPathExpression
-		);
+}
 
-		if (resultToBeFreed != nullptr)
-			xmlXPathFreeObject(resultToBeFreed);
+bool XMLWrapper::setAttribute(const std::string& xPathExpression,
+	const size_t nodeIndex, // starting from 0
+	const std::string& attributeName,
+	const std::string& attributeValue,
+	xmlNodePtr startingNode) const
+{
+    xmlXPathObjectPtr resultToBeFreed = nullptr;
 
-		throw e;
-	}
+    try
+    {
+        resultToBeFreed = xPath(xPathExpression, startingNode, false);
+    }
+    catch (const std::exception& e)
+    {
+        LOG_ERROR("setAttribute failed"
+            ", xPathExpression: {}"
+            ", exception: {}",
+            xPathExpression, e.what());
+
+        throw;
+    }
+
+    try
+    {
+        if (!resultToBeFreed
+        	|| !resultToBeFreed->nodesetval
+        	|| resultToBeFreed->nodesetval->nodeNr <= nodeIndex)
+        {
+        	string errorMessage = std::format("setAttribute failed, node not found"
+				", xPathExpression: {}",
+				xPathExpression);
+        	LOG_ERROR(errorMessage);
+
+        	if (resultToBeFreed)
+                xmlXPathFreeObject(resultToBeFreed);
+
+            throw std::runtime_error(errorMessage);
+        }
+
+        xmlNodePtr node = resultToBeFreed->nodesetval->nodeTab[nodeIndex];
+        if (!node)
+        {
+			const string errorMessage = std::format("setAttribute failed, node not found"
+				", xPathExpression: {}",
+				xPathExpression);
+        	LOG_ERROR(errorMessage);
+
+        	xmlXPathFreeObject(resultToBeFreed);
+            throw std::runtime_error(errorMessage);
+        }
+
+        // Set (create or replace) the attribute.
+        // xmlSetProp returns xmlAttrPtr (nullptr on error).
+        xmlAttrPtr a = xmlSetProp(node, BAD_CAST attributeName.c_str(), BAD_CAST attributeValue.c_str());
+
+        xmlXPathFreeObject(resultToBeFreed);
+        resultToBeFreed = nullptr;
+
+        if (!a)
+        {
+        	string errorMessage = std::format("setAttribute failed"
+				", xPathExpression: {}"
+				", attributeName: {}",
+				xPathExpression, attributeName);
+        	LOG_ERROR(errorMessage);
+
+            throw std::runtime_error(errorMessage);
+        }
+
+        return true;
+    }
+    catch (const std::exception& e)
+    {
+        LOG_ERROR("setAttribute failed"
+        	", xPathExpression: {}"
+        	", exception: {}",
+        	xPathExpression, e.what());
+
+        if (resultToBeFreed)
+            xmlXPathFreeObject(resultToBeFreed);
+
+        throw;
+    }
 }
 
 vector<string> XMLWrapper::asAttributesList(const string& xPathExpression, const string& attributeName, xmlNodePtr startingNode, bool emptyOnError) const
@@ -415,37 +526,22 @@ vector<string> XMLWrapper::asAttributesList(const string& xPathExpression, const
 
 		return attributes;
 	}
-	catch (runtime_error &e)
+	catch (const exception &e)
 	{
 		if (resultToBeFreed != nullptr)
 			xmlXPathFreeObject(resultToBeFreed);
 
 		if (emptyOnError)
-			return vector<string>();
-		else
-		{
-			LOG_ERROR(
-				"asAttributesList failed"
-				", xPathExpression: {}"
-				", e.what(): {}",
-				xPathExpression, e.what()
-			);
+			return {};
 
-			throw e;
-		}
-	}
-	catch (exception &e)
-	{
 		LOG_ERROR(
 			"asAttributesList failed"
-			", xPathExpression: {}",
-			xPathExpression
+			", xPathExpression: {}"
+			", exception: {}",
+			xPathExpression, e.what()
 		);
 
-		if (resultToBeFreed != nullptr)
-			xmlXPathFreeObject(resultToBeFreed);
-
-		throw e;
+		throw;
 	}
 }
 
@@ -471,37 +567,22 @@ vector<string> XMLWrapper::asTextList(const string& xPathExpression, xmlNodePtr 
 
 		return textList;
 	}
-	catch (runtime_error &e)
+	catch (const exception &e)
 	{
 		if (resultToBeFreed != nullptr)
 			xmlXPathFreeObject(resultToBeFreed);
 
 		if (emptyOnError)
 			return {};
-		else
-		{
-			LOG_ERROR(
-				"asAttributes failed"
-				", xPathExpression: {}"
-				", e.what(): {}",
-				xPathExpression, e.what()
-			);
 
-			throw e;
-		}
-	}
-	catch (exception &e)
-	{
 		LOG_ERROR(
 			"asAttributes failed"
-			", xPathExpression: {}",
-			xPathExpression
+			", xPathExpression: {}"
+			", exception: {}",
+			xPathExpression, e.what()
 		);
 
-		if (resultToBeFreed != nullptr)
-			xmlXPathFreeObject(resultToBeFreed);
-
-		throw e;
+		throw;
 	}
 }
 
@@ -541,37 +622,22 @@ string XMLWrapper::asText(const string& xPathExpression, xmlNodePtr startingNode
 
 		return text;
 	}
-	catch (runtime_error &e)
+	catch (const exception &e)
 	{
 		if (resultToBeFreed != nullptr)
 			xmlXPathFreeObject(resultToBeFreed);
 
 		if (emptyOnError)
 			return "";
-		else
-		{
-			LOG_ERROR(
-				"asText failed"
-				", xPathExpression: {}"
-				", e.what(): {}",
-				xPathExpression, e.what()
-			);
 
-			throw e;
-		}
-	}
-	catch (exception &e)
-	{
 		LOG_ERROR(
 			"asText failed"
-			", xPathExpression: {}",
-			xPathExpression
+			", xPathExpression: {}"
+			", exception: {}",
+			xPathExpression, e.what()
 		);
 
-		if (resultToBeFreed != nullptr)
-			xmlXPathFreeObject(resultToBeFreed);
-
-		throw e;
+		throw;
 	}
 }
 
@@ -591,37 +657,22 @@ bool XMLWrapper::tagExist(const string& xPathExpression, xmlNodePtr startingNode
 
 		return tagExist;
 	}
-	catch (runtime_error &e)
+	catch (const exception &e)
 	{
 		if (resultToBeFreed != nullptr)
 			xmlXPathFreeObject(resultToBeFreed);
 
 		if (emptyOnError)
 			return false;
-		else
-		{
-			LOG_ERROR(
-				"tagExist failed"
-				", xPathExpression: {}"
-				", e.what(): {}",
-				xPathExpression, e.what()
-			);
 
-			throw e;
-		}
-	}
-	catch (exception &e)
-	{
 		LOG_ERROR(
 			"tagExist failed"
-			", xPathExpression: {}",
-			xPathExpression
+			", xPathExpression: {}"
+			", exception: {}",
+			xPathExpression, e.what()
 		);
 
-		if (resultToBeFreed != nullptr)
-			xmlXPathFreeObject(resultToBeFreed);
-
-		throw e;
+		throw;
 	}
 }
 
@@ -638,12 +689,12 @@ void XMLWrapper::logAttributes(xmlNodePtr node)
 			attribute = attribute->next;
 		}
 	}
-	catch (exception &e)
+	catch (const exception &e)
 	{
 		LOG_ERROR(
 			"logAttributes failed"
 			", node->name: {}"
-			", e.what(): {}",
+			", exception: {}",
 			(node == nullptr ? "" : (char *)node->name), e.what()
 		);
 
@@ -651,6 +702,7 @@ void XMLWrapper::logAttributes(xmlNodePtr node)
 	}
 }
 
+/*
 string XMLWrapper::toString() const
 {
 	if (_doc == nullptr)
@@ -681,7 +733,7 @@ string XMLWrapper::toString() const
 	{
 		LOG_ERROR(
 			"xmlDocDumpMemory failed"
-			", e.what(): {}",
+			", exception: {}",
 			e.what()
 		);
 		xmlFree(s);
@@ -693,6 +745,7 @@ string XMLWrapper::toString() const
 
 	return out;
 }
+*/
 
 string XMLWrapper::nodeToString(xmlNodePtr node)
 {
@@ -705,9 +758,7 @@ string XMLWrapper::nodeToString(xmlNodePtr node)
 
 	string out;
 	if (buffer->content)
-	{
 		out = reinterpret_cast<const char *>(buffer->content);
-	}
 
 	xmlBufferFree(buffer);
 	return out;
