@@ -33,7 +33,6 @@ void XMLWrapper::finish()
 
 void XMLWrapper::loadXML(
 	const string& url, int16_t timeoutInSeconds, const string& basicAuthenticationUser, const string& basicAuthenticationPassword,
-	const vector<string>& otherHeaders,
 	int16_t maxRetryNumber, int16_t secondsToWaitBeforeToRetry, const vector<pair<string, string>>& nameServices
 )
 {
@@ -45,7 +44,6 @@ void XMLWrapper::loadXML(
 		inputParameters.url = url;
 		inputParameters.timeoutInSeconds = timeoutInSeconds;
 		inputParameters.authorization = CurlWrapper::basicAuthorization(basicAuthenticationUser, basicAuthenticationPassword);
-		inputParameters.otherHeaders = otherHeaders;
 		inputParameters.maxRetryNumber = maxRetryNumber;
 		inputParameters.secondsToWaitBeforeToRetry = secondsToWaitBeforeToRetry;
 
