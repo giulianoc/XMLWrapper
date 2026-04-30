@@ -331,8 +331,11 @@ xmlXPathObjectPtr XMLWrapper::xPath(const string& xPathExpression, xmlNodePtr st
 				xPathExpression, e.what()
 			);
 
-		if (resultToBeFreed != nullptr)
+		if (resultToBeFreed)
+		{
 			xmlXPathFreeObject(resultToBeFreed);
+			resultToBeFreed = nullptr;
+		}
 
 		throw;
 	}
@@ -417,6 +420,7 @@ string XMLWrapper::asAttribute(string xPathExpression, const string& attributeNa
 			);
 
 		xmlXPathFreeObject(resultToBeFreed);
+		resultToBeFreed = nullptr;
 
 		throw;
 	}
@@ -436,7 +440,7 @@ bool XMLWrapper::setAttribute(const std::string& xPathExpression,
     }
     catch (const std::exception& e)
     {
-        LOG_ERROR("setAttribute failed"
+        LOG_ERROR("setAttribute failed, path not found"
             ", xPathExpression: {}"
             ", exception: {}",
             xPathExpression, e.what());
@@ -451,12 +455,18 @@ bool XMLWrapper::setAttribute(const std::string& xPathExpression,
         	|| resultToBeFreed->nodesetval->nodeNr <= nodeIndex)
         {
         	string errorMessage = std::format("setAttribute failed, node not found"
-				", xPathExpression: {}",
-				xPathExpression);
+				", xPathExpression: {}"
+				", nodeNr: {}"
+				", nodeIndex: {}",
+				xPathExpression, resultToBeFreed && resultToBeFreed->nodesetval ? resultToBeFreed->nodesetval->nodeNr : -1,
+				nodeIndex);
         	LOG_ERROR(errorMessage);
 
         	if (resultToBeFreed)
-                xmlXPathFreeObject(resultToBeFreed);
+        	{
+        		xmlXPathFreeObject(resultToBeFreed);
+        		resultToBeFreed = nullptr;
+        	}
 
             throw std::runtime_error(errorMessage);
         }
@@ -470,7 +480,9 @@ bool XMLWrapper::setAttribute(const std::string& xPathExpression,
         	LOG_ERROR(errorMessage);
 
         	xmlXPathFreeObject(resultToBeFreed);
-            throw std::runtime_error(errorMessage);
+        	resultToBeFreed = nullptr;
+
+        	throw std::runtime_error(errorMessage);
         }
 
         // Set (create or replace) the attribute.
@@ -500,8 +512,11 @@ bool XMLWrapper::setAttribute(const std::string& xPathExpression,
         	", exception: {}",
         	xPathExpression, e.what());
 
-        if (resultToBeFreed)
-            xmlXPathFreeObject(resultToBeFreed);
+    	if (resultToBeFreed)
+    	{
+    		xmlXPathFreeObject(resultToBeFreed);
+    		resultToBeFreed = nullptr;
+    	}
 
         throw;
     }
@@ -528,8 +543,11 @@ vector<string> XMLWrapper::asAttributesList(const string& xPathExpression, const
 	}
 	catch (const exception &e)
 	{
-		if (resultToBeFreed != nullptr)
+		if (resultToBeFreed)
+		{
 			xmlXPathFreeObject(resultToBeFreed);
+			resultToBeFreed = nullptr;
+		}
 
 		if (emptyOnError)
 			return {};
@@ -569,8 +587,11 @@ vector<string> XMLWrapper::asTextList(const string& xPathExpression, xmlNodePtr 
 	}
 	catch (const exception &e)
 	{
-		if (resultToBeFreed != nullptr)
+		if (resultToBeFreed)
+		{
 			xmlXPathFreeObject(resultToBeFreed);
+			resultToBeFreed = nullptr;
+		}
 
 		if (emptyOnError)
 			return {};
@@ -624,8 +645,11 @@ string XMLWrapper::asText(const string& xPathExpression, xmlNodePtr startingNode
 	}
 	catch (const exception &e)
 	{
-		if (resultToBeFreed != nullptr)
+		if (resultToBeFreed)
+		{
 			xmlXPathFreeObject(resultToBeFreed);
+			resultToBeFreed = nullptr;
+		}
 
 		if (emptyOnError)
 			return "";
@@ -659,8 +683,11 @@ bool XMLWrapper::tagExist(const string& xPathExpression, xmlNodePtr startingNode
 	}
 	catch (const exception &e)
 	{
-		if (resultToBeFreed != nullptr)
+		if (resultToBeFreed)
+		{
 			xmlXPathFreeObject(resultToBeFreed);
+			resultToBeFreed = nullptr;
+		}
 
 		if (emptyOnError)
 			return false;
