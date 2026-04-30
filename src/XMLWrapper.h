@@ -60,6 +60,7 @@ class XMLWrapper
 	static void logAttributes(xmlNodePtr node);
 
 	std::string _sourceXML;
+	std::string _eTag;
 
   private:
 	xmlDocPtr _doc;

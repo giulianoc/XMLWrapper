@@ -39,10 +39,17 @@ void XMLWrapper::loadXML(
 	{
 		finish();
 
-		_sourceXML = CurlWrapper::httpGet(
-			url, timeoutInSeconds, CurlWrapper::basicAuthorization(basicAuthenticationUser, basicAuthenticationPassword),
-			otherHeaders, "", maxRetryNumber, secondsToWaitBeforeToRetry
-		);
+		CurlWrapper::InputParameters inputParameters;
+		inputParameters.url = url;
+		inputParameters.timeoutInSeconds = timeoutInSeconds;
+		inputParameters.authorization = CurlWrapper::basicAuthorization(basicAuthenticationUser, basicAuthenticationPassword);
+		inputParameters.otherHeaders = otherHeaders;
+		inputParameters.maxRetryNumber = maxRetryNumber;
+		inputParameters.secondsToWaitBeforeToRetry = secondsToWaitBeforeToRetry;
+
+		CurlWrapper::OutputParameters outputParameters;
+		_sourceXML = CurlWrapper::httpGet(inputParameters, outputParameters);
+		_eTag = outputParameters.getResponseHeaderValue("ETag");
 
 		/*
 		 * The document being in memory, it have no base per RFC 2396,
