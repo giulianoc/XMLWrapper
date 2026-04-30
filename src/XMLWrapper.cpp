@@ -51,6 +51,8 @@ void XMLWrapper::loadXML(
 
 		CurlWrapper::OutputParameters outputParameters;
 		_sourceXML = CurlWrapper::httpGet(inputParameters, outputParameters);
+		for (const auto& [key, value] : outputParameters.responseHeaders)
+			LOG_INFO("Response header: {}: {}", key, value);
 		_eTag = outputParameters.getResponseHeaderValue("ETag");
 
 		/*
