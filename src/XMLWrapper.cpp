@@ -1,6 +1,8 @@
 
 #include "XMLWrapper.h"
+#include "../../StringUtils/src/StringUtils.h"
 #include "CurlWrapper.h"
+
 #include <exception>
 #include <libxml/xpathInternals.h>
 #include <regex>
@@ -62,7 +64,7 @@ void XMLWrapper::loadXML(
 		(1) get rid of that declaration in your book tag or (2) give it a name, and use that name in your tags.
 		*/
 		string xml = _sourceXML;
-		// xml = regex_replace(xml, regex("xmlns="), "xmlns:mio=");
+		xml = StringUtils::replaceAll(xml, "xmlns=", "xmlns:mio=");
 		_doc = xmlReadMemory(xml.c_str(), xml.size(), "noname.xml", "UTF-8", 0);
 		// doc = xmlParseFile("/var/log/cms/dump.xml");
 		if (_doc == nullptr)
@@ -154,6 +156,9 @@ string XMLWrapper::asString(const bool pretty) const
 
 		std::string sXML(reinterpret_cast<char*>(mem), static_cast<size_t>(size));
 		xmlFree(mem);
+
+		// vedi commento nel metodo loadXML
+		sXML = StringUtils::replaceAll(sXML, "xmlns:mio=", "xmlns=");
 
 		return sXML;
 	}
