@@ -93,6 +93,8 @@ void XMLWrapper::loadXML(
 			throw runtime_error(errorMessage);
 		}
 
+		_xpathCtx->node = xmlDocGetRootElement(_doc);  // context node = <entry>
+
 		for (const pair<string, string>& nameService : nameServices)
 			xmlXPathRegisterNs(_xpathCtx, BAD_CAST nameService.first.c_str(), BAD_CAST nameService.second.c_str());
 	}
