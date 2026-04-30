@@ -62,7 +62,7 @@ void XMLWrapper::loadXML(
 		(1) get rid of that declaration in your book tag or (2) give it a name, and use that name in your tags.
 		*/
 		string xml = _sourceXML;
-		xml = regex_replace(xml, regex("xmlns="), "xmlns:mio=");
+		// xml = regex_replace(xml, regex("xmlns="), "xmlns:mio=");
 		_doc = xmlReadMemory(xml.c_str(), xml.size(), "noname.xml", "UTF-8", 0);
 		// doc = xmlParseFile("/var/log/cms/dump.xml");
 		if (_doc == nullptr)
@@ -122,6 +122,7 @@ string XMLWrapper::asString(const bool pretty) const
 			throw runtime_error(errorMessage);
 		}
 
+		/*
 		// Assicura versione/encoding (così libxml2 emette la declaration)
 		if (!_doc->version)
 			_doc->version = xmlStrdup(BAD_CAST "1.0");
@@ -130,6 +131,7 @@ string XMLWrapper::asString(const bool pretty) const
 		// Nota: doc->encoding è xmlChar*, va allocata con funzioni libxml2.
 		if (!_doc->encoding)
 			_doc->encoding = xmlStrdup(BAD_CAST "UTF-8");
+		*/
 
 		int size = 0;
 		if (pretty)
