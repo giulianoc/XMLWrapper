@@ -48,9 +48,11 @@ void XMLWrapper::loadXML(
 		inputParameters.secondsToWaitBeforeToRetry = secondsToWaitBeforeToRetry;
 
 		CurlWrapper::OutputParameters outputParameters;
+		LOG_ERROR("INIZIO CurlWrapper::httpGet");
 		_sourceXML = CurlWrapper::httpGet(inputParameters, outputParameters);
 		for (const auto& [key, value] : outputParameters.responseHeaders)
 			LOG_INFO("Response header: {}: {}", key, value);
+		LOG_ERROR("FINE CurlWrapper::httpGet");
 		_eTag = outputParameters.getResponseHeaderValue("ETag");
 
 		/*
