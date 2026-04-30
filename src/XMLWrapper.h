@@ -27,12 +27,12 @@ class XMLWrapper
 	~XMLWrapper();
 
 	void loadXML(
-		const std::string &url, long timeoutInSeconds, const std::string &basicAuthenticationUser, const std::string &basicAuthenticationPassword,
-		const std::vector<std::string> &otherHeaders, int maxRetryNumber, int secondsToWaitBeforeToRetry,
+		const std::string &url, int16_t timeoutInSeconds, const std::string &basicAuthenticationUser, const std::string &basicAuthenticationPassword,
+		const std::vector<std::string> &otherHeaders, int16_t maxRetryNumber, int16_t secondsToWaitBeforeToRetry,
 		const std::vector<std::pair<std::string, std::string>> &nameServices
 	);
-	[[nodiscard]] std::string asString(bool pretty) const;
-	void saveXML(std::string pathName, bool pretty) const;
+	[[nodiscard]] std::string asString(bool pretty = false) const;
+	void saveXMLFile(std::string pathName, bool pretty) const;
 
 	// [[nodiscard]] std::string toString() const;
 	static std::string nodeToString(xmlNodePtr node);

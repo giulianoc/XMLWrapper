@@ -30,9 +30,9 @@ void XMLWrapper::finish()
 }
 
 void XMLWrapper::loadXML(
-	const string& url, long timeoutInSeconds, const string& basicAuthenticationUser, const string& basicAuthenticationPassword,
+	const string& url, int16_t timeoutInSeconds, const string& basicAuthenticationUser, const string& basicAuthenticationPassword,
 	const vector<string>& otherHeaders,
-	int maxRetryNumber, int secondsToWaitBeforeToRetry, const vector<pair<string, string>>& nameServices
+	int16_t maxRetryNumber, int16_t secondsToWaitBeforeToRetry, const vector<pair<string, string>>& nameServices
 )
 {
 	try
@@ -40,8 +40,8 @@ void XMLWrapper::loadXML(
 		finish();
 
 		_sourceXML = CurlWrapper::httpGet(
-			url, timeoutInSeconds, CurlWrapper::basicAuthorization(basicAuthenticationUser, basicAuthenticationPassword), otherHeaders, "",
-			maxRetryNumber, secondsToWaitBeforeToRetry
+			url, timeoutInSeconds, CurlWrapper::basicAuthorization(basicAuthenticationUser, basicAuthenticationPassword),
+			otherHeaders, "", maxRetryNumber, secondsToWaitBeforeToRetry
 		);
 
 		/*
@@ -163,7 +163,7 @@ string XMLWrapper::asString(const bool pretty) const
 	}
 }
 
-void XMLWrapper::saveXML(string pathName, bool pretty) const
+void XMLWrapper::saveXMLFile(string pathName, bool pretty) const
 {
 	try
 	{
