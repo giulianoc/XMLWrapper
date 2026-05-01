@@ -52,6 +52,7 @@ class XMLWrapper
 	std::vector<std::string> asAttributesList(const std::string &xPathExpression, const std::string &attributeName, xmlNodePtr startingNode = nullptr, bool emptyOnError = false) const;
 
 	std::string asText(const std::string &xPathExpression, xmlNodePtr startingNode, bool emptyOnError = false) const;
+	void setElementText(const std::string &xPathExpression, xmlNodePtr startingNode, const std::string &newText) const;
 
 	bool tagExist(const std::string &xPathExpression, xmlNodePtr startingNode, bool emptyOnError = false) const;
 
