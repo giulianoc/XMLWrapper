@@ -40,13 +40,13 @@ void XMLWrapper::loadXML(
 	{
 		finish();
 
-		CurlWrapper::InputParameters inputParameters;
-		inputParameters.url = url;
-		inputParameters.timeoutInSeconds = timeoutInSeconds;
-		inputParameters.authorization = CurlWrapper::basicAuthorization(basicAuthenticationUser, basicAuthenticationPassword);
-		inputParameters.maxRetryNumber = maxRetryNumber;
-		inputParameters.secondsToWaitBeforeToRetry = secondsToWaitBeforeToRetry;
-
+		CurlWrapper::InputParameters inputParameters {
+			.url = url,
+			.timeoutInSeconds = timeoutInSeconds,
+			.authorization = CurlWrapper::basicAuthorization(basicAuthenticationUser, basicAuthenticationPassword),
+			.maxRetryNumber = maxRetryNumber,
+			.secondsToWaitBeforeToRetry = secondsToWaitBeforeToRetry
+		};
 		CurlWrapper::OutputParameters outputParameters;
 		_sourceXML = CurlWrapper::httpGet(inputParameters, outputParameters);
 		_eTag = outputParameters.getResponseHeaderValue("ETag");
