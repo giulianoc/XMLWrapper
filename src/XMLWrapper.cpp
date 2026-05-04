@@ -40,7 +40,7 @@ void XMLWrapper::loadXML(
 	{
 		finish();
 
-		CurlWrapper::InputParameters inputParameters {
+		CurlWrapper::GetInputParameters inputParameters {
 			.url = url,
 			.timeoutInSeconds = timeoutInSeconds,
 			.authorization = CurlWrapper::basicAuthorization(basicAuthenticationUser, basicAuthenticationPassword),
