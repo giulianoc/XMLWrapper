@@ -411,6 +411,7 @@ string XMLWrapper::asAttribute(string xPathExpression, const string& attributeNa
 	catch (const exception &e)
 	{
 		if (!emptyOnError)
+		{
 			LOG_ERROR(
 				"asAttribute failed"
 				", xPathExpression: {}"
@@ -418,7 +419,9 @@ string XMLWrapper::asAttribute(string xPathExpression, const string& attributeNa
 				xPathExpression, e.what()
 			);
 
-		throw;
+			throw;
+		}
+		return {};
 	}
 }
 
