@@ -410,18 +410,17 @@ string XMLWrapper::asAttribute(string xPathExpression, const string& attributeNa
 	}
 	catch (const exception &e)
 	{
-		if (!emptyOnError)
-		{
-			LOG_ERROR(
-				"asAttribute failed"
-				", xPathExpression: {}"
-				", exception: {}",
-				xPathExpression, e.what()
-			);
+		if (emptyOnError)
+			return {};
 
-			throw;
-		}
-		return {};
+		LOG_ERROR(
+			"asAttribute failed"
+			", xPathExpression: {}"
+			", exception: {}",
+			xPathExpression, e.what()
+		);
+
+		throw;
 	}
 }
 
